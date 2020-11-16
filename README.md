@@ -3,6 +3,9 @@
 MTCの入力をキーボード入力に変換します。<br>
 電車でd shiningstageでの利用を想定しています。
 <br><br>
+DLはこちらから。
+https://github.com/saha209/MTC-to-DenD/releases/tag/ver1.0
+<br><br>
 ライブラリとしてLibUsbDotNet( https://sourceforge.net/projects/libusbdotnet/ )を活用しました。<br>
 LibUsbDotNet及びドライバはLGPL v3が適応されます。
 <br><br>
