@@ -9,10 +9,14 @@ LibUsbDotNet及びドライバはLGPL v3が適応されます。
 このソフトはMTC P4-B7+非常 専用です。他のカセットでは動作しません。
 <br><br>
 キーコンフィグ<br>
+<br>
 力行P1-4段 : "A"<br>
 N段 : NULL<br>
 ブレーキB1-7段 : "S"<br>
 ブレーキ非常段 : "D"<br>
+<br>
+※レバーサが切のときはどの段であってもNULL。<br>
+<br>
 やじる上下左右 : 上下左右<br>
 ボタンA : "Q"<br>
 ボタンA深押し : NULL<br>
@@ -20,5 +24,5 @@ N段 : NULL<br>
 ボタンC : NULL<br>
 ボタンD : "W"<br>
 ボタンATS確認 : NULL<br>
-ボタンSELECT : NULL<br>
-ボタンstart : "Esc"<br>
+ボタンSELECT : "Esc"<br>
+ボタンstart : "Home"<br>

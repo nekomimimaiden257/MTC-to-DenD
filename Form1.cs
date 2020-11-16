@@ -365,13 +365,13 @@ namespace checkUSB
             string bottonbin_ = Convert.ToString(readBuffer[3], 2);
             int bottonnum_ = Convert.ToInt32(bottonbin_);
 
-            //start・未実装
+            //start・"home"
             int bottonnum1_ = bottonnum_ - (bottonnum_ / 10) * 10;
             if (bottonnum1_ != bottonnum1_befor)
             {
                 if (bottonnum1_ % 2 == 1)
                 {
-                    senddata1 = null;
+                    senddata1 = "{home}";
                 }
                 else
                 {
