@@ -3,7 +3,7 @@
 MTCの入力をキーボード入力に変換します。<br>
 電車でd shiningstageでの利用を想定しています。
 <br><br>
-DLは左のReleasesから。
+DLは左のReleasesの一番上、MTC-to-DenD.zipから。
 <br><br>
 ライブラリとしてLibUsbDotNet( https://sourceforge.net/projects/libusbdotnet/ )を活用しました。<br>
 LibUsbDotNet及びドライバはLGPL v3が適応されます。
