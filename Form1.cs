@@ -23,6 +23,7 @@ namespace checkUSB
         private string senddata = string.Empty;
         private string Pnotchsend = string.Empty;
         private string Bnotchsend = string.Empty;
+        private string beforsend = string.Empty;
         private string senddata1 = string.Empty;
         private string senddata2 = string.Empty;
         private string senddata3 = string.Empty;
@@ -34,6 +35,7 @@ namespace checkUSB
         private string senddata9 = string.Empty;
         private string senddata10 = string.Empty;
         private string senddata11 = string.Empty;
+        private string sendbotton = string.Empty;
         int nownotch = 0;
         int nowbrake = 0;
         int bottonnum1befor = 0;
@@ -98,7 +100,14 @@ namespace checkUSB
                 }
             }));
             thread.Start();
-            
+
+            Thread thread2 = new Thread(new ThreadStart(() => {
+                while (!IsDisposing)
+                {//Disposeが呼ばれるまで無限ループ
+                    Senddata();
+                }
+            }));
+            thread2.Start();
 
         }
 
@@ -568,12 +577,18 @@ namespace checkUSB
 
 
 
-            senddata = senddata1 + senddata2 + senddata3 + senddata4 + senddata5 + senddata6 + senddata7+ senddata8 + senddata9 + senddata10 + senddata11 + Pnotchsend + Bnotchsend;
+            sendbotton = senddata1 + senddata2 + senddata3 + senddata4 + senddata5 + senddata6 + senddata7 + senddata8 + senddata9 + senddata10 + senddata11;
+            senddata = Pnotchsend + Bnotchsend;
+
+            SendKeys.SendWait(sendbotton);
             
-            SendKeys.SendWait(senddata);
         }
 
-        
+
+        private void Senddata()
+        {
+            SendKeys.SendWait(senddata);
+        }
 
     }
 
