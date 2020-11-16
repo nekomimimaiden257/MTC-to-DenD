@@ -53,6 +53,7 @@ namespace checkUSB
         public Form1()
         {
             InitializeComponent();
+            this.ControlBox = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -61,6 +62,12 @@ namespace checkUSB
 
         }
 
+        private void Form1_Closing(object sender, EventArgs e)
+        {
+            MyUsbDevice = null;
+            IsDisposing = true;
+
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             ErrorCode ec = ErrorCode.None;
@@ -110,7 +117,14 @@ namespace checkUSB
             label1.Text = "切断中";
         }
         
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            MyUsbDevice = null;
+            IsDisposing = true;
+            label1.Text = "切断中";
+            Application.Exit();
 
+        }
 
         private void DataRead()
         {
