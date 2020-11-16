@@ -23,7 +23,6 @@ namespace checkUSB
         private string senddata = string.Empty;
         private string Pnotchsend = string.Empty;
         private string Bnotchsend = string.Empty;
-        private string beforsend = string.Empty;
         private string senddata1 = string.Empty;
         private string senddata2 = string.Empty;
         private string senddata3 = string.Empty;
@@ -99,14 +98,7 @@ namespace checkUSB
                 }
             }));
             thread.Start();
-
-            Thread thread2 = new Thread(new ThreadStart(() => {
-                while (!IsDisposing)
-                {//Disposeが呼ばれるまで無限ループ
-                    Senddata();
-                }
-            }));
-            thread2.Start();
+            
 
         }
 
@@ -377,8 +369,12 @@ namespace checkUSB
                 {
                     senddata1 = null;
                 }
-                bottonnum1_befor = bottonnum1_;
             }
+            else
+            {
+                senddata1 = null;
+            }
+            bottonnum1_befor = bottonnum1_;
 
             //select・"esc"
             int bottonnum10_ = (bottonnum_ - (bottonnum_ / 100) * 100) / 10;
@@ -392,8 +388,12 @@ namespace checkUSB
                 {
                     senddata2 = null;
                 }
-                bottonnum10_befor = bottonnum10_;
             }
+            else
+            {
+                senddata2 = null;
+            }
+            bottonnum10_befor = bottonnum10_;
 
             //↑
             int bottonnum100_ = (bottonnum_ - (bottonnum_ / 1000) * 1000) / 100;
@@ -407,8 +407,8 @@ namespace checkUSB
                 {
                     senddata3 = null;
                 }
-                bottonnum100_befor = bottonnum100_;
             }
+            bottonnum100_befor = bottonnum100_;
 
             //↓
             int bottonnum1000_ = (bottonnum_ - (bottonnum_ / 10000) * 10000) / 1000;
@@ -422,8 +422,8 @@ namespace checkUSB
                 {
                     senddata4 = null;
                 }
-                bottonnum1000_befor = bottonnum1000_;
             }
+            bottonnum1000_befor = bottonnum1000_;
 
 
             //←
@@ -438,8 +438,8 @@ namespace checkUSB
                 {
                     senddata5 = null;
                 }
-                bottonnum10000_befor = bottonnum10000_;
             }
+            bottonnum10000_befor = bottonnum10000_;
 
             //→
             int bottonnum100000_ = (bottonnum_ - (bottonnum_ / 1000000) * 1000000) / 100000;
@@ -453,8 +453,8 @@ namespace checkUSB
                 {
                     senddata6 = null;
                 }
-                bottonnum100000_befor = bottonnum100000_;
             }
+            bottonnum100000_befor = bottonnum100000_;
 
 
             //ボタンの処理
@@ -473,8 +473,12 @@ namespace checkUSB
                 {
                     senddata7 = null;
                 }
-                bottonnum1befor = bottonnum1;
             }
+            else
+            {
+                senddata7 = null;
+            }
+            bottonnum1befor = bottonnum1;
 
             //D・"W"
             int bottonnum10 = (bottonnum - (bottonnum / 100) * 100) / 10;
@@ -488,8 +492,12 @@ namespace checkUSB
                 {
                     senddata8 = null;
                 }
-                bottonnum10befor = bottonnum10;
             }
+            else
+            {
+                senddata8 = null;
+            }
+            bottonnum10befor = bottonnum10;
 
             //A・"Q"
             int bottonnum100 = (bottonnum - (bottonnum / 1000) * 1000) / 100;
@@ -503,15 +511,19 @@ namespace checkUSB
                 {
                     senddata9 = null;
                 }
-                bottonnum100befor = bottonnum100;
             }
+            else
+            {
+                senddata9 = null;
+            }
+            bottonnum100befor = bottonnum100;
 
             //A深押し
             int bottonnum1000 = (bottonnum - (bottonnum / 10000) * 10000) / 1000;
             if (bottonnum1000 != bottonnum1000befor)
             {
-                bottonnum1000befor = bottonnum1000;
             }
+            bottonnum1000befor = bottonnum1000;
 
 
             //B・"エンター"
@@ -526,8 +538,12 @@ namespace checkUSB
                 {
                     senddata10 = null;
                 }
-                bottonnum10000befor = bottonnum10000;
             }
+            else
+            {
+                senddata10 = null;
+            }
+            bottonnum10000befor = bottonnum10000;
 
             //C・未実装
             int bottonnum100000 = (bottonnum - (bottonnum / 1000000) * 1000000) / 100000;
@@ -541,23 +557,23 @@ namespace checkUSB
                 {
                     senddata11 = null;
                 }
-                bottonnum100000befor = bottonnum100000;
             }
+            else
+            {
+                senddata11 = null;
+            }
+            bottonnum100000befor = bottonnum100000;
 
 
 
 
 
             senddata = senddata1 + senddata2 + senddata3 + senddata4 + senddata5 + senddata6 + senddata7+ senddata8 + senddata9 + senddata10 + senddata11 + Pnotchsend + Bnotchsend;
-
-            beforsend = senddata;
-        }
-
-
-        private void Senddata()
-        {
+            
             SendKeys.SendWait(senddata);
         }
+
+        
 
     }
 
