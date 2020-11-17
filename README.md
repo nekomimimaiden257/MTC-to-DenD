@@ -28,4 +28,4 @@ LibUsbDotNet及びドライバはLGPL v3が適応されます。<br>
 |ボタンSELECT|"Esc"|
 |ボタンSTART|"Home"|
 <br>
-※レバーサが切のときはどの段であってもNULL。<br>
+※レバーサが切のときはどの段であってもノッチはNULLを返します。<br>
