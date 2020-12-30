@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
 [assembly: AssemblyTitle("MTCtoDenD")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("MTCの信号をキーボードの入力に変換することで無理矢理に電車でD SSで動かす。")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("MTCtoDenD")]

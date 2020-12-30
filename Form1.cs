@@ -7,19 +7,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using LibUsbDotNet;
-using LibUsbDotNet.Main;
+using LibUsbDotNet; // USBライブラリの名前空間を使用する
+using LibUsbDotNet.Main; // USBライブラリの名前空間を使用する
 using System.Threading;
 
+//参考URL: https://www.ipentec.com/document/libusbdotnet-app-create 
+
+// checkUSB 名前空間に、MTC to DenD の機能を押し込む
 namespace checkUSB
 {
-
+    /// <summary>
+    /// デザインフォームのコード。
+    /// この1フォームで全部をやる。
+    /// app.manifest で起動時に管理者権限を要求する。
+    /// </summary>
     public partial class Form1 : Form
     {
 
-        public static UsbDevice MyUsbDevice;
-        public static UsbDeviceFinder MyUsbFinder = new UsbDeviceFinder(0x0AE4, 0x0101);
+        #region VariableSection
+        public static UsbDevice MyUsbDevice; //USBデバイス自体を格納する
+        // MTC P4-B7+非常 専用 、USB機器のベンダIDと機器IDがMTCごとに違うから、ほかのMTCに対応できない。
+        public static UsbDeviceFinder MyUsbFinder = new UsbDeviceFinder(0x0AE4, 0x0101); // USB機器のベンダーIDとプロダクトIDを指定する。
         bool IsDisposing = false;//Disposeが実行中かどうかをチェック
+
+        //なぜ配列で持たないのかは不明
         private string senddata = string.Empty;
         private string Pnotchsend = string.Empty;
         private string Bnotchsend = string.Empty;
@@ -51,34 +62,64 @@ namespace checkUSB
         int bottonnum10000_befor = 0;
         int bottonnum100000_befor = 0;
 
+        #endregion
+
+        /// <summary>
+        /// Form1のコンストラクタ
+        /// </summary>
         public Form1()
         {
             InitializeComponent();
             this.ControlBox = false;
         }
 
+        /// <summary>
+        /// フォーム読み込み時
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
             label1.Text = "切断中";
+            //USBのベンダーIDとプロダクトIDをTextBoxコントロールに表示する。
+            textBox1.Text = "0x" + Convert.ToString( MTCtoDenD.Properties.Settings.Default.UsbVenderID , 16).ToUpper();
+            textBox2.Text = "0x" + Convert.ToString( MTCtoDenD.Properties.Settings.Default.UsbProductID , 16).ToUpper();
 
         }
 
+        /// <summary>
+        /// フォームを閉じるとき≒終了時
+        /// USBデバイスと終了フラグを立てる
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Closing(object sender, EventArgs e)
         {
             MyUsbDevice = null;
             IsDisposing = true;
-
+            button5.PerformClick();//ベンダーIDとプロダクトIDを保存する。
         }
+
+        /// <summary>
+        /// button1( 接続ボタン )をクリックしたら
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <remarks>USBのベンダIDとプロダクトIDの変更を禁止する。</remarks>
         private void button1_Click(object sender, EventArgs e)
         {
             ErrorCode ec = ErrorCode.None;
 
+            button5.Enabled = false;
+
             try
             {
+                // MyUsbFinderで見つけた、USBデバイスを開いて、MyUsbDeviceに格納する。
                 MyUsbDevice = UsbDevice.OpenUsbDevice(MyUsbFinder);
 
+                // MyUsbDevice が見つからんのであれば、デバイスが見つからないとException吐いて抜ける。
                 if (MyUsbDevice == null) throw new Exception("Device Not Found.");
-                IUsbDevice wholeUsbDevice = MyUsbDevice as IUsbDevice;
+                IUsbDevice wholeUsbDevice = MyUsbDevice as IUsbDevice; // MyUsbDeviceがIUsbDeviceとして扱えるなら、続行。
                 if (!ReferenceEquals(wholeUsbDevice, null))
                 {
                     IsDisposing = false;
@@ -88,11 +129,13 @@ namespace checkUSB
                 }
 
             }
+            // USBデバイス識別段階でトラブったら、Label1にエラーメッセージを残す。
             catch (Exception ex)
             {
                 label1.Text = ec != ErrorCode.None ? ec + ":" : String.Empty + ex.Message;
             }
 
+            //データ読み取り用のスレッドを立てる。
             Thread thread = new Thread(new ThreadStart(() => {
                 while (!IsDisposing)
                 {//Disposeが呼ばれるまで無限ループ
@@ -101,6 +144,7 @@ namespace checkUSB
             }));
             thread.Start();
 
+            // データ送信用のすれどを立てる。
             Thread thread2 = new Thread(new ThreadStart(() => {
                 while (!IsDisposing)
                 {//Disposeが呼ばれるまで無限ループ
@@ -111,34 +155,56 @@ namespace checkUSB
 
         }
 
+        /// <summary>
+        /// button3（ 切断ボタン ）デバイスだけを閉じて、アプリケーションは終了しない。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <remarks>USBのベンダIDとプロダクトIDの変更を許可する</remarks>
         private void button3_Click(object sender, EventArgs e)
         {
+            button5.Enabled = true;
             MyUsbDevice = null;
             IsDisposing = true;
             label1.Text = "切断中";
         }
-        
+
+        /// <summary>
+        /// Button2（ 終了ボタン ）クリック時
+        /// USBデバイスを解放して、終了する。
+        /// ラベルに切断中を表示するが、多分表示完了前にアプリケーションが終了する。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <remarks>USBのベンダIDとプロダクトIDの変更を許可する</remarks>
         private void button2_Click_1(object sender, EventArgs e)
         {
+            button5.Enabled = true;
             MyUsbDevice = null;
             IsDisposing = true;
             label1.Text = "切断中";
-            Application.Exit();
+            Application.Exit(); //アプリケーション終了
 
         }
 
+        /// <summary>
+        /// 受信 （  ）メソッド
+        /// </summary>
         private void DataRead()
         {
             ErrorCode ec = ErrorCode.None;
+            //リーダーを立てる。
             UsbEndpointReader reader = MyUsbDevice.OpenEndpointReader(ReadEndpointID.Ep01);
-            byte[] readBuffer = new byte[8];
+            byte[] readBuffer = new byte[8]; //データはバイト単位で来る。
             int bytesRead;
-            ec = reader.Read(readBuffer, 100, out bytesRead);
-            String str = BitConverter.ToString(readBuffer);
+            ec = reader.Read(readBuffer, 100, out bytesRead);//データ受信
+            String str = BitConverter.ToString(readBuffer);//読み取ったデータを文字列に変換する。
             //label2.Text = str;
 
+            //マスコンのノッチ？
             switch (readBuffer[1])
             {
+                // 逆転機=ニュートラル
                 case 0x01:
                     //label3.Text = "EB";
                     nownotch = 0;
@@ -204,6 +270,7 @@ namespace checkUSB
                     nownotch = 0;
                     nowbrake = 0;
                     break;
+                //逆転機=前
                 case 0x41:
                     //label3.Text = "EB";
                     nownotch = 0;
@@ -339,24 +406,24 @@ namespace checkUSB
             
 
             
-
+            //スロットルニュートラル
             if (nownotch == 0)
             {
                 Pnotchsend = null;
             }
-            else if (nownotch > 0)
+            else if (nownotch > 0) //力行＜りっこう＞ノッチ
             {
                 Pnotchsend = "A";
             }
-            if (nowbrake == 0)
+            if (nowbrake == 0)//ブレーキ緩解
             {
                 Bnotchsend = null;
             }
-            else if (nowbrake > 0 && nowbrake != 9)
+            else if (nowbrake > 0 && nowbrake != 9) //常用ブレーキ
             {
                 Bnotchsend = "S";
             }
-            else if (nowbrake == 9)
+            else if (nowbrake == 9) //非常ブレーキ
             {
                 Bnotchsend = "D";
             }
@@ -580,16 +647,113 @@ namespace checkUSB
             sendbotton = senddata1 + senddata2 + senddata3 + senddata4 + senddata5 + senddata6 + senddata7 + senddata8 + senddata9 + senddata10 + senddata11;
             senddata = Pnotchsend + Bnotchsend;
 
-            SendKeys.SendWait(sendbotton);
-            
+
+            // 軽量化有効なら、Wait入れてCPU休ませつつ、メッセージ消化させる
+            // コストとして50ms 消費する( 60fps（16.67ms）基準なら3フレーム遅延する)
+            // Windowsのタイマーが50msでスレッド切り替えなので
+            if (checkBox1.Checked)
+            {
+                SendKeys.SendWait(sendbotton);
+                SendKeys.Flush();//DoEvents()と等価？
+                Application.DoEvents();
+                Thread.Sleep(1); //1msだけCPUを開放するが、コンテキストスイッチさせない。しかし、実際には、16msは消費する。
+            }
+            else
+            {
+                // 軽量化無効であれば従来通り
+                SendKeys.SendWait(sendbotton);
+            }
+
         }
 
 
+        /// <summary>
+        /// 送信（  →  ）メソッド
+        /// </summary>
+        /// <remarks>
+        /// もしかして、ノッチの文字情報を電車でDへ送ってるだけ？
+        /// </remarks>
         private void Senddata()
         {
-            SendKeys.SendWait(senddata);
+            //SendKeys.SendWait();
+
+            // 軽量化有効なら、Wait入れてCPU休ませつつ、メッセージ消化させる
+            // コストとして50ms 消費する( 60fps（16.67ms）基準なら3フレーム遅延する)
+            // Windowsのデフォルトタイマーが50msでスレッド切り替えの分解能なので
+            if (checkBox1.Checked)
+            {
+                SendKeys.SendWait(senddata);
+                SendKeys.Flush();
+                Application.DoEvents();//DoEvents()と等価？
+                Thread.Sleep(1); //1msだけCPUを開放するが、コンテキストスイッチさせない。しかし、実際には、16msは消費する。
+            }
+            else 
+            {
+                // 軽量化無効であれば、従来通り
+                SendKeys.SendWait(senddata);
+            }
         }
 
+        /// <summary>
+        /// button4をクリックしたら、電車でD SSを起動する。同じフォルダーに電車でD SSの実行ファイルがある事！
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button4_Click(object sender, EventArgs e)
+        {
+            const string progname = @"電車でＤ ShiningStage.exe"; //電車でD ShingStageの実行ファイル名を書き換え不能で宣言
+            if ( System.IO.File.Exists(progname) ) {
+                // 電車でDの実行ファイルがカレントディレクトリに存在する -> 起動
+                System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                proc.StartInfo.FileName = progname;
+                proc.StartInfo.UseShellExecute = true; // シェルモードON（UnityのChsarpだから、falseでもあがる？）
+                // 管理者として実行する設定
+                proc.StartInfo.Verb = "RunAs";
+                try
+                {
+                    proc.Start();//電車でD ShingStageプロセスの起動
+                }
+                catch (Exception Ex) {
+                    label1.Text = Ex.ToString();
+                    MessageBox.Show("電車での実行ファイル起動失敗。", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                //起動させたら野放しで、MTC to DenD では関知しない。
+            }
+            else {
+                // 電車でDの実行ファイルがない -> 何もできない。
+                MessageBox.Show("電車でD ShingStage が見つかりませんでした。", this.Text, MessageBoxButtons.OK , MessageBoxIcon.Error );
+            
+            }
+        }
+
+        /// <summary>
+        /// button5をクリックしたら、入力されたUSBベンダーIDとプロダクトIDの値を設定に保存する。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button5_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                //ベンダーIDとプロダクトID（16進数）をIntに変換して、値をセットする。
+                MTCtoDenD.Properties.Settings.Default.UsbVenderID = Convert.ToInt32(textBox1.Text, 16);
+                MTCtoDenD.Properties.Settings.Default.UsbProductID = Convert.ToInt32(textBox2.Text, 16);
+
+            }
+            catch (FormatException Fex)
+            {
+                label1.Text = Fex.ToString();
+                MessageBox.Show("ベンダーIDかプロダクトIDの数値形式がおかしい。", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception Ex) {
+                label1.Text = Ex.ToString();
+                MessageBox.Show("ベンダーIDかプロダクトIDの変換失敗。" , this.Text , MessageBoxButtons.OK , MessageBoxIcon.Error);
+            }
+            // この時点でセーブする。
+            MTCtoDenD.Properties.Settings.Default.Save();
+            //USBのベンダベンダIDとプロダクトIDをUSBファインダーに登録する
+            MyUsbFinder = new UsbDeviceFinder( Convert.ToInt32( textBox1.Text ) ,Convert.ToInt32( textBox2.Text ) );
+        }
     }
 
-}
+}   
